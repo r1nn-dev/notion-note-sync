@@ -39,7 +39,7 @@ class NotionMarkdownClient:
 
         if response.status_code >= 400:
             raise NotionAPIError(
-                f"Notion API 요청 실패\n"
+                "Notion API 요청 실패\n"
                 f"status_code={response.status_code}\n"
                 f"response={response.text}"
             )
