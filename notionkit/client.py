@@ -1,3 +1,4 @@
+import time
 from typing import Any
 
 import requests
@@ -9,10 +10,19 @@ class NotionAPIError(RuntimeError):
 
 class NotionMarkdownClient:
     BASE_URL = "https://api.notion.com/v1"
+    RETRY_STATUS_CODES = {429, 500, 503, 504, 529}
 
-    def __init__(self, notion_token: str, notion_version: str) -> None:
+    def __init__(
+        self,
+        notion_token: str,
+        notion_version: str,
+        max_retries: int = 3,
+        retry_backoff_seconds: float = 1.0,
+    ) -> None:
         self.notion_token = notion_token
         self.notion_version = notion_version
+        self.max_retries = max_retries
+        self.retry_backoff_seconds = retry_backoff_seconds
 
     def _headers(self) -> dict[str, str]:
         return {
@@ -29,13 +39,19 @@ class NotionMarkdownClient:
     ) -> dict[str, Any]:
         url = f"{self.BASE_URL}{path}"
 
-        response = requests.request(
-            method=method,
-            url=url,
-            headers=self._headers(),
-            timeout=30,
-            **kwargs,
-        )
+        for attempt in range(self.max_retries + 1):
+            response = requests.request(
+                method=method,
+                url=url,
+                headers=self._headers(),
+                timeout=30,
+                **kwargs,
+            )
+
+            if not self._should_retry(response, attempt):
+                break
+
+            time.sleep(self._retry_delay(response, attempt))
 
         if response.status_code >= 400:
             raise NotionAPIError(
@@ -45,6 +61,22 @@ class NotionMarkdownClient:
             )
 
         return response.json()
+
+    def _should_retry(self, response: requests.Response, attempt: int) -> bool:
+        if attempt >= self.max_retries:
+            return False
+
+        return response.status_code in self.RETRY_STATUS_CODES
+
+    def _retry_delay(self, response: requests.Response, attempt: int) -> float:
+        retry_after = response.headers.get("Retry-After")
+        if retry_after:
+            try:
+                return float(retry_after)
+            except ValueError:
+                pass
+
+        return self.retry_backoff_seconds * (2**attempt)
 
     def retrieve_page_markdown(self, page_id: str) -> dict[str, Any]:
         return self._request(

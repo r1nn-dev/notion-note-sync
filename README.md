@@ -25,6 +25,7 @@ Markdown으로 관리하는 개인 노트를 Notion 페이지에 동기화하는
 * `config/pages.json`에 등록한 모든 페이지를 한 번에 동기화한다.
 * `--dry-run` 옵션으로 실제 수정 없이 동기화 대상을 확인한다.
 * 동기화 전 기존 Notion 페이지 Markdown을 `backup/`에 저장한다.
+* Notion API의 일시적인 제한이나 서버 오류가 발생하면 짧게 재시도한다.
 
 추가로 고려하는 기능은 다음과 같다.
 
@@ -203,6 +204,8 @@ Notion 페이지 안에 child page나 database가 있으면 내용 교체가 막
 ```powershell
 python scripts\sync_page.py --page sample --allow-deleting-content
 ```
+
+Notion API가 rate limit 또는 일시적인 서버 오류를 반환하면 자동으로 재시도한다. `Retry-After` 헤더가 있으면 해당 대기 시간을 우선 사용한다.
 
 ## 보안 원칙
 
