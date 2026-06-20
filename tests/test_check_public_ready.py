@@ -2,6 +2,7 @@ from scripts.check_public_ready import (
     find_blocked_tracked_paths,
     normalize_git_path,
     run_public_ready_checks,
+    scan_file_for_sensitive_values,
 )
 
 
@@ -31,5 +32,11 @@ def test_find_blocked_tracked_paths_flags_private_files() -> None:
 
 def test_run_public_ready_checks_accepts_safe_tracked_files() -> None:
     findings = run_public_ready_checks(["README.md", "notes/sample.md"])
+
+    assert findings == []
+
+
+def test_scan_file_for_sensitive_values_skips_deleted_tracked_file() -> None:
+    findings = scan_file_for_sensitive_values("missing-file.txt")
 
     assert findings == []

@@ -79,6 +79,8 @@ def find_blocked_tracked_paths(paths: list[str]) -> list[PublicReadyFinding]:
 
 def scan_file_for_sensitive_values(path: str) -> list[PublicReadyFinding]:
     file_path = PROJECT_ROOT / path
+    if not file_path.exists():
+        return []
 
     try:
         content = file_path.read_text(encoding="utf-8")
