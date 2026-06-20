@@ -108,32 +108,12 @@ type(scope): description
 예시는 다음과 같다.
 
 ```text
-init: create base project directories
-docs(readme): add project documentation
-config(gitignore): ignore local environment and private files
-config(env): add example environment variables
-config(notion): add example page mapping
 feat(sync): implement markdown page sync command
 fix(auth): handle missing notion token
-refactor(client): extract notion api request logic
+docs(readme): update project documentation
 test(sync): add sync page test cases
-chore(deps): update dependencies
+security: add public readiness check
 ```
-
-자주 쓰는 타입은 다음과 같다.
-
-| Type | 의미 |
-| --- | --- |
-| `init` | 프로젝트 초기 구조 생성 |
-| `feat` | 기능 추가 |
-| `fix` | 버그 수정 |
-| `docs` | 문서 수정 |
-| `style` | 코드 포맷, 공백, 세미콜론 등 비동작 변경 |
-| `refactor` | 기능 변화 없는 코드 구조 개선 |
-| `test` | 테스트 추가 또는 수정 |
-| `chore` | 패키지, 빌드, 기타 관리 작업 |
-| `config` | 환경 설정 파일 수정 |
-| `security` | 보안 관련 수정 |
 
 ## License
 
