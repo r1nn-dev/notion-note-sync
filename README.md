@@ -143,6 +143,8 @@ Notion Integration을 만든 뒤, 동기화할 Notion 페이지에 해당 Integr
 * `page_id`: Notion Page ID이다.
 * `file`: Notion에 반영할 Markdown 파일 경로이다.
 
+`page_id`와 `file`은 필수 값이며 비어 있으면 동기화를 시작하지 않는다. `title`을 생략하면 페이지 키를 제목으로 사용한다.
+
 ## 연결 테스트
 
 Notion 페이지 접근 권한과 Markdown 조회 가능 여부를 확인한다.

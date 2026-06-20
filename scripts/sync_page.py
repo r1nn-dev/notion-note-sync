@@ -3,6 +3,7 @@ import json
 import re
 import sys
 from datetime import datetime
+from json import JSONDecodeError
 from pathlib import Path
 from typing import Any
 
@@ -15,9 +16,10 @@ from notionkit.settings import load_settings
 
 
 SyncTarget = tuple[str, str, str]
+PageMapping = dict[str, dict[str, str]]
 
 
-def load_page_mapping(config_path: str) -> dict[str, Any]:
+def load_page_mapping(config_path: str) -> PageMapping:
     path = Path(config_path)
 
     if not path.exists():
@@ -26,8 +28,53 @@ def load_page_mapping(config_path: str) -> dict[str, Any]:
             "config/pages.example.json을 복사해서 config/pages.json을 만드세요."
         )
 
-    with path.open("r", encoding="utf-8") as file:
-        return json.load(file)
+    try:
+        with path.open("r", encoding="utf-8-sig") as file:
+            page_mapping = json.load(file)
+    except JSONDecodeError as error:
+        raise ValueError(
+            f"페이지 매핑 설정 파일의 JSON 형식이 올바르지 않습니다: {config_path}\n"
+            f"{error}"
+        ) from error
+
+    return validate_page_mapping(page_mapping, config_path)
+
+
+def validate_page_mapping(page_mapping: Any, config_path: str) -> PageMapping:
+    if not isinstance(page_mapping, dict):
+        raise ValueError(f"페이지 매핑 설정은 JSON object여야 합니다: {config_path}")
+
+    if not page_mapping:
+        raise ValueError(f"페이지 매핑 설정이 비어 있습니다: {config_path}")
+
+    validated_mapping: PageMapping = {}
+    for page_key, page_info in page_mapping.items():
+        if not isinstance(page_key, str) or not page_key:
+            raise ValueError("페이지 키는 비어 있지 않은 문자열이어야 합니다.")
+
+        if not isinstance(page_info, dict):
+            raise ValueError(f"페이지 설정은 JSON object여야 합니다: {page_key}")
+
+        title = page_info.get("title", page_key)
+        page_id = page_info.get("page_id")
+        file_path = page_info.get("file")
+
+        if not isinstance(title, str) or not title:
+            raise ValueError(f"title은 비어 있지 않은 문자열이어야 합니다: {page_key}")
+
+        if not isinstance(page_id, str) or not page_id:
+            raise ValueError(f"page_id는 비어 있지 않은 문자열이어야 합니다: {page_key}")
+
+        if not isinstance(file_path, str) or not file_path:
+            raise ValueError(f"file은 비어 있지 않은 문자열이어야 합니다: {page_key}")
+
+        validated_mapping[page_key] = {
+            "title": title,
+            "page_id": page_id,
+            "file": file_path,
+        }
+
+    return validated_mapping
 
 
 def read_markdown(markdown_path: str) -> str:
