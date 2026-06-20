@@ -135,13 +135,13 @@ pip install -r requirements.txt
 향후 목표 실행 명령어는 다음과 같습니다.
 
 ```bash
-python scripts/sync_page.py --page sample
+python -m scripts.sync_page --page sample
 ```
 
 또는 특정 Markdown 파일과 Notion Page ID를 직접 지정하는 방식도 지원할 예정입니다.
 
 ```bash
-python scripts/sync_page.py --page-id "NOTION_PAGE_ID" --file "notes/sample.md"
+python -m scripts.sync_page --page-id "NOTION_PAGE_ID" --file "notes/sample.md"
 ```
 
 ## 9. 보안 원칙
