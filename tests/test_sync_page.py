@@ -1,9 +1,13 @@
 import argparse
+from io import StringIO
+from pathlib import Path
 
 import pytest
 
 from scripts.sync_page import (
+    TeeWriter,
     make_safe_filename,
+    resolve_log_path,
     resolve_sync_targets,
     validate_page_mapping,
 )
@@ -91,3 +95,23 @@ def test_resolve_sync_targets_rejects_partial_direct_target() -> None:
 )
 def test_make_safe_filename(value: str, expected: str) -> None:
     assert make_safe_filename(value) == expected
+
+
+def test_tee_writer_writes_to_all_streams() -> None:
+    first = StringIO()
+    second = StringIO()
+    writer = TeeWriter(first, second)
+
+    assert writer.write("hello") == 5
+
+    assert first.getvalue() == "hello"
+    assert second.getvalue() == "hello"
+
+
+def test_resolve_log_path_creates_parent_directory(tmp_path: Path) -> None:
+    log_path = tmp_path / "logs" / "sync.log"
+
+    result = resolve_log_path(str(log_path))
+
+    assert result == log_path
+    assert log_path.parent.exists()

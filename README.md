@@ -26,12 +26,13 @@ Markdown으로 관리하는 개인 노트를 Notion 페이지에 동기화하는
 * `--dry-run` 옵션으로 실제 수정 없이 동기화 대상을 확인한다.
 * 동기화 전 기존 Notion 페이지 Markdown을 `backup/`에 저장한다.
 * Notion API의 일시적인 제한이나 서버 오류가 발생하면 짧게 재시도한다.
+* `--log-file` 옵션으로 실행 결과를 파일에 함께 저장한다.
 
 추가로 고려하는 기능은 다음과 같다.
 
 * Markdown 변경 감지 후 자동 동기화
 * GitHub Actions 기반 자동 실행
-* 실행 로그와 실패 케이스 정리
+* 실패 케이스 정리
 
 ## 기술 스택
 
@@ -187,6 +188,12 @@ python scripts\sync_page.py --page sample --dry-run
 
 ```powershell
 python scripts\sync_page.py --all --dry-run
+```
+
+실행 결과를 파일로 남기려면 `--log-file`을 사용한다. 콘솔 출력과 오류가 지정한 파일에도 함께 저장된다.
+
+```powershell
+python scripts\sync_page.py --all --log-file "logs/sync.log"
 ```
 
 Page ID와 Markdown 파일을 직접 지정할 수도 있다.

@@ -1,4 +1,5 @@
 import argparse
+from contextlib import redirect_stderr, redirect_stdout
 import json
 import re
 import sys
@@ -17,6 +18,20 @@ from notionkit.settings import load_settings
 
 SyncTarget = tuple[str, str, str]
 PageMapping = dict[str, dict[str, str]]
+
+
+class TeeWriter:
+    def __init__(self, *streams: Any) -> None:
+        self.streams = streams
+
+    def write(self, value: str) -> int:
+        for stream in self.streams:
+            stream.write(value)
+        return len(value)
+
+    def flush(self) -> None:
+        for stream in self.streams:
+            stream.flush()
 
 
 def load_page_mapping(config_path: str) -> PageMapping:
@@ -208,6 +223,80 @@ def sync_target(
     print(f"updated_markdown_length: {len(result.get('markdown', ''))}")
 
 
+def run_sync(args: argparse.Namespace, parser: argparse.ArgumentParser) -> None:
+    try:
+        targets = resolve_sync_targets(args)
+    except (FileNotFoundError, KeyError, ValueError) as error:
+        parser.error(str(error))
+
+    if args.all:
+        print(f"전체 동기화 대상: {len(targets)}개")
+
+    client = None
+    if not args.dry_run:
+        settings = load_settings()
+        client = NotionMarkdownClient(
+            notion_token=settings.notion_token,
+            notion_version=settings.notion_version,
+        )
+
+    failed_targets: list[str] = []
+    for index, (title, page_id, markdown_path) in enumerate(targets, start=1):
+        if len(targets) > 1:
+            print(f"\n[{index}/{len(targets)}]")
+
+        try:
+            sync_target(
+                client=client,
+                title=title,
+                page_id=page_id,
+                markdown_path=markdown_path,
+                dry_run=args.dry_run,
+                skip_backup=args.skip_backup,
+                backup_dir=args.backup_dir,
+                allow_deleting_content=args.allow_deleting_content,
+            )
+        except (FileNotFoundError, KeyError, NotionAPIError, RuntimeError) as error:
+            print("Notion 페이지 동기화 실패")
+            print(error)
+            failed_targets.append(title)
+
+            if len(targets) == 1:
+                raise SystemExit(1)
+
+    if failed_targets:
+        print(f"\n실패한 동기화 대상: {', '.join(failed_targets)}")
+        raise SystemExit(1)
+
+    if len(targets) > 1:
+        print(f"\n전체 동기화 완료: {len(targets)}개")
+
+
+def resolve_log_path(log_file: str) -> Path:
+    log_path = Path(log_file)
+    if not log_path.is_absolute():
+        log_path = PROJECT_ROOT / log_path
+
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    return log_path
+
+
+def run_with_optional_log(
+    args: argparse.Namespace,
+    parser: argparse.ArgumentParser,
+) -> None:
+    if not args.log_file:
+        run_sync(args, parser)
+        return
+
+    log_path = resolve_log_path(args.log_file)
+    with log_path.open("a", encoding="utf-8") as log:
+        with redirect_stdout(TeeWriter(sys.stdout, log)):
+            with redirect_stderr(TeeWriter(sys.stderr, log)):
+                print(f"실행 로그 파일: {log_path}")
+                run_sync(args, parser)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Markdown 파일 내용을 Notion 페이지에 동기화합니다."
@@ -255,55 +344,13 @@ def main() -> None:
         default="backup",
         help="기존 Notion Markdown 백업을 저장할 디렉터리",
     )
+    parser.add_argument(
+        "--log-file",
+        help="콘솔 출력과 오류를 함께 저장할 로그 파일 경로",
+    )
 
     args = parser.parse_args()
-
-    try:
-        targets = resolve_sync_targets(args)
-    except (FileNotFoundError, KeyError, ValueError) as error:
-        parser.error(str(error))
-
-    if args.all:
-        print(f"전체 동기화 대상: {len(targets)}개")
-
-    client = None
-    if not args.dry_run:
-        settings = load_settings()
-        client = NotionMarkdownClient(
-            notion_token=settings.notion_token,
-            notion_version=settings.notion_version,
-        )
-
-    failed_targets: list[str] = []
-    for index, (title, page_id, markdown_path) in enumerate(targets, start=1):
-        if len(targets) > 1:
-            print(f"\n[{index}/{len(targets)}]")
-
-        try:
-            sync_target(
-                client=client,
-                title=title,
-                page_id=page_id,
-                markdown_path=markdown_path,
-                dry_run=args.dry_run,
-                skip_backup=args.skip_backup,
-                backup_dir=args.backup_dir,
-                allow_deleting_content=args.allow_deleting_content,
-            )
-        except (FileNotFoundError, KeyError, NotionAPIError, RuntimeError) as error:
-            print("Notion 페이지 동기화 실패")
-            print(error)
-            failed_targets.append(title)
-
-            if len(targets) == 1:
-                raise SystemExit(1)
-
-    if failed_targets:
-        print(f"\n실패한 동기화 대상: {', '.join(failed_targets)}")
-        raise SystemExit(1)
-
-    if len(targets) > 1:
-        print(f"\n전체 동기화 완료: {len(targets)}개")
+    run_with_optional_log(args, parser)
 
 
 if __name__ == "__main__":
