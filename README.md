@@ -4,6 +4,8 @@
 
 Notion 페이지를 웹에서 직접 열어 내용을 복사하고 붙여넣는 대신, 로컬에서 작성한 Markdown 파일을 기준으로 지정한 Notion 페이지를 갱신한다. 여러 페이지를 `config/pages.json`으로 관리하고, 동기화 전 기존 Notion 내용을 자동 백업한다.
 
+큰 문서 관리 시스템이나 Notion 대체 도구가 아니라, 정해진 Markdown 파일을 정해진 Notion 페이지에 안전하게 반영하기 위한 작은 자동화 도구이다.
+
 ## What It Does
 
 * Notion Integration Token을 `.env`에서 읽는다.
@@ -17,6 +19,22 @@ Notion 페이지를 웹에서 직접 열어 내용을 복사하고 붙여넣는 
 * 실행 로그를 `--log-file`로 파일에 남긴다.
 * 일괄 동기화 결과를 성공/실패 개수와 실패 상세로 요약한다.
 * 테스트와 민감 정보 점검을 CI에서 실행할 수 있다.
+
+## Scope
+
+이 프로젝트는 다음 범위에 집중한다.
+
+* 로컬 Markdown에서 Notion으로 가는 단방향 동기화
+* 사용자가 명시한 Page ID와 Markdown 파일만 처리
+* 실행 전 확인, 실행 전 백업, 실행 후 결과 요약
+* 토큰과 실제 Page ID가 Git에 들어가지 않도록 점검
+
+현재 지원하지 않는 범위:
+
+* Notion 변경 내용을 로컬 Markdown으로 가져오는 양방향 동기화
+* Markdown diff 미리보기
+* 파일 변경 감시 기반 자동 실행
+* 복잡한 Notion 블록 편집 UI
 
 ## Quick Start
 
