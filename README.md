@@ -29,7 +29,7 @@ Markdown으로 관리하는 개인 노트를 Notion 페이지에 동기화하는
 * `--log-file` 옵션으로 실행 결과를 파일에 함께 저장한다.
 * 전체 동기화에서 실패한 페이지와 실패 이유를 요약한다.
 
-추가로 고려하는 기능은 다음과 같다.
+추가로 고려할 수 있는 선택 기능은 다음과 같다.
 
 * Markdown 변경 감지 후 자동 동기화
 * GitHub Actions 기반 자동 실행
@@ -282,44 +282,36 @@ chore(deps): update dependencies
 | `config` | 환경 설정 파일 수정 |
 | `security` | 보안 관련 수정 |
 
-## 개발 로드맵
+## 개발 상태
 
-### Phase 1. Repository Setup
+### 완료된 작업
 
 * 기본 디렉터리 구조 생성
 * `.gitignore` 작성
 * `.env.example` 작성
 * `requirements.txt` 작성
 * README 작성
-
-### Phase 2. Notion API Connection
-
 * Notion Integration 생성
 * 환경 변수 기반 인증 처리
 * Notion API 요청 테스트
 * 페이지 접근 권한 확인
-
-### Phase 3. Markdown Sync
-
 * Markdown 파일 읽기
 * Notion 페이지에 Markdown 내용 반영
 * 페이지 매핑 설정 적용
 * 단일 페이지 동기화 명령 구현
 * 동기화 전 기존 페이지 Markdown 백업
-
-### Phase 4. Multi Page Sync
-
 * 여러 페이지 일괄 동기화
 * 동기화 대상 설정 파일 관리
 * 실행 로그 출력
 * 실패 케이스 예외 처리
-
-### Phase 5. Portfolio Ready
-
-* 예제 문서 추가
 * 사용법 정리
 * 보안 점검
-* 공개 저장소 전환 준비
+* MIT License 추가
+
+### 남은 선택 작업
+
+* Markdown 변경 감지 후 자동 동기화
+* GitHub Actions 기반 자동 실행
 
 ## 공개 전 체크리스트
 
@@ -329,9 +321,12 @@ chore(deps): update dependencies
 * 실제 Notion Token이 Git 히스토리에 남아 있지 않은가
 * 실제 개인 Notion Page ID가 공개 파일에 포함되지 않았는가
 * 개인 강의자료, PDF, 원문 자료가 포함되지 않았는가
+* `python scripts\check_public_ready.py`가 통과하는가
+* `python -m pytest`가 통과하는가
 * README만 보고 프로젝트 목적과 실행 방법을 이해할 수 있는가
 * 실행 가능한 예제 파일이 포함되어 있는가
 * 커밋 메시지 히스토리가 일관적인가
+* 공개 범위와 사용 목적에 맞는 라이선스가 지정되어 있는가
 
 ## License
 
