@@ -1,3 +1,5 @@
+"""Notion 페이지 접근 권한과 Markdown 조회 가능 여부를 확인하는 CLI 스크립트."""
+
 import argparse
 import sys
 from pathlib import Path
