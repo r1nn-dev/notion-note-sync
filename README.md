@@ -335,6 +335,4 @@ chore(deps): update dependencies
 
 ## License
 
-초기 개발 단계에서는 라이선스를 지정하지 않는다.
-
-공개 저장소로 전환하기 전에 공개 범위와 사용 목적에 맞는 라이선스를 선택할 예정이다.
+이 프로젝트는 MIT License를 사용한다. 자세한 내용은 `LICENSE` 파일을 참고한다.
