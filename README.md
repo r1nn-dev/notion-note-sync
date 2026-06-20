@@ -109,6 +109,14 @@ PowerShell에서 가상환경을 활성화한다.
 pip install -r requirements.txt
 ```
 
+## 테스트
+
+단위 테스트는 `pytest`로 실행한다.
+
+```powershell
+python -m pytest
+```
+
 ## Notion 페이지 연결
 
 Notion Integration을 만든 뒤, 동기화할 Notion 페이지에 해당 Integration을 연결해야 한다.
