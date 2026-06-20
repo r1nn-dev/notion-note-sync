@@ -1,5 +1,6 @@
 import argparse
 from contextlib import redirect_stderr, redirect_stdout
+from dataclasses import dataclass
 import json
 import re
 import sys
@@ -18,6 +19,12 @@ from notionkit.settings import load_settings
 
 SyncTarget = tuple[str, str, str]
 PageMapping = dict[str, dict[str, str]]
+
+
+@dataclass(frozen=True)
+class SyncFailure:
+    title: str
+    error: str
 
 
 class TeeWriter:
@@ -223,6 +230,27 @@ def sync_target(
     print(f"updated_markdown_length: {len(result.get('markdown', ''))}")
 
 
+def summarize_error(error: Exception) -> str:
+    message = str(error).strip()
+    if not message:
+        return error.__class__.__name__
+
+    return message.splitlines()[0]
+
+
+def print_sync_summary(success_count: int, failures: list[SyncFailure]) -> None:
+    print("\n동기화 요약")
+    print(f"성공: {success_count}개")
+    print(f"실패: {len(failures)}개")
+
+    if not failures:
+        return
+
+    print("실패 상세:")
+    for failure in failures:
+        print(f"- {failure.title}: {failure.error}")
+
+
 def run_sync(args: argparse.Namespace, parser: argparse.ArgumentParser) -> None:
     try:
         targets = resolve_sync_targets(args)
@@ -240,7 +268,8 @@ def run_sync(args: argparse.Namespace, parser: argparse.ArgumentParser) -> None:
             notion_version=settings.notion_version,
         )
 
-    failed_targets: list[str] = []
+    success_count = 0
+    failures: list[SyncFailure] = []
     for index, (title, page_id, markdown_path) in enumerate(targets, start=1):
         if len(targets) > 1:
             print(f"\n[{index}/{len(targets)}]")
@@ -256,16 +285,16 @@ def run_sync(args: argparse.Namespace, parser: argparse.ArgumentParser) -> None:
                 backup_dir=args.backup_dir,
                 allow_deleting_content=args.allow_deleting_content,
             )
+            success_count += 1
         except (FileNotFoundError, KeyError, NotionAPIError, RuntimeError) as error:
             print("Notion 페이지 동기화 실패")
             print(error)
-            failed_targets.append(title)
+            failures.append(SyncFailure(title=title, error=summarize_error(error)))
 
-            if len(targets) == 1:
-                raise SystemExit(1)
+    if args.all or len(targets) > 1 or failures:
+        print_sync_summary(success_count, failures)
 
-    if failed_targets:
-        print(f"\n실패한 동기화 대상: {', '.join(failed_targets)}")
+    if failures:
         raise SystemExit(1)
 
     if len(targets) > 1:

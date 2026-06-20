@@ -5,10 +5,13 @@ from pathlib import Path
 import pytest
 
 from scripts.sync_page import (
+    SyncFailure,
     TeeWriter,
     make_safe_filename,
+    print_sync_summary,
     resolve_log_path,
     resolve_sync_targets,
+    summarize_error,
     validate_page_mapping,
 )
 
@@ -115,3 +118,22 @@ def test_resolve_log_path_creates_parent_directory(tmp_path: Path) -> None:
 
     assert result == log_path
     assert log_path.parent.exists()
+
+
+def test_summarize_error_uses_first_line() -> None:
+    error = RuntimeError("first line\nsecond line")
+
+    assert summarize_error(error) == "first line"
+
+
+def test_print_sync_summary_includes_failure_details(capsys: pytest.CaptureFixture[str]) -> None:
+    print_sync_summary(
+        success_count=2,
+        failures=[SyncFailure(title="Sample", error="missing file")],
+    )
+
+    output = capsys.readouterr().out
+
+    assert "성공: 2개" in output
+    assert "실패: 1개" in output
+    assert "- Sample: missing file" in output
