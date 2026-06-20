@@ -23,11 +23,11 @@ Markdown으로 관리하는 개인 노트를 Notion 페이지에 동기화하는
 * 로컬 Markdown 파일을 읽어 Notion 페이지 내용으로 교체한다.
 * `config/pages.json`에 등록한 페이지 키로 동기화 대상을 선택한다.
 * `--dry-run` 옵션으로 실제 수정 없이 동기화 대상을 확인한다.
+* 동기화 전 기존 Notion 페이지 Markdown을 `backup/`에 저장한다.
 
 추가로 고려하는 기능은 다음과 같다.
 
 * 여러 페이지 일괄 동기화
-* 동기화 전 기존 페이지 내용 백업
 * Markdown 변경 감지 후 자동 동기화
 * GitHub Actions 기반 자동 실행
 * 실행 로그와 실패 케이스 정리
@@ -172,6 +172,20 @@ Page ID와 Markdown 파일을 직접 지정할 수도 있다.
 python scripts\sync_page.py --page-id "NOTION_PAGE_ID" --file "notes/sample.md"
 ```
 
+기본 동기화는 Notion 페이지를 교체하기 전에 기존 Markdown을 `backup/` 디렉터리에 저장한다. 백업 파일 이름에는 실행 시각, 페이지 제목, Page ID 앞 8자리가 포함된다.
+
+백업 위치를 바꾸려면 `--backup-dir`을 사용한다.
+
+```powershell
+python scripts\sync_page.py --page sample --backup-dir "backup/notion"
+```
+
+백업 없이 바로 동기화하려면 `--skip-backup`을 사용한다.
+
+```powershell
+python scripts\sync_page.py --page sample --skip-backup
+```
+
 Notion 페이지 안에 child page나 database가 있으면 내용 교체가 막힐 수 있다. 그런 항목 삭제가 필요한 교체 작업을 허용하려면 다음 옵션을 사용한다.
 
 ```powershell
@@ -250,6 +264,7 @@ chore(deps): update dependencies
 * Notion 페이지에 Markdown 내용 반영
 * 페이지 매핑 설정 적용
 * 단일 페이지 동기화 명령 구현
+* 동기화 전 기존 페이지 Markdown 백업
 
 ### Phase 4. Multi Page Sync
 
