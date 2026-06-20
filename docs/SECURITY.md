@@ -1,45 +1,100 @@
 # Security
 
-이 프로젝트는 공개 저장소로 전환할 가능성을 고려해 민감한 정보와 공개 파일을 분리한다.
+이 문서는 이 저장소에서 민감 정보를 다루는 기준을 정리한다. 핵심은 Notion Token, 실제 Page ID, 개인 노트, 백업/로그 파일을 Git에 올리지 않는 것이다.
 
-## Local-Only Files
+## Git에 올리지 않는 파일
 
-다음 파일과 디렉터리는 Git에 커밋하지 않는다.
+다음 파일과 디렉터리는 로컬 전용이다.
 
-* `.env`
-* `.env.*`
-* `config/pages.json`
-* `notes/private/`
-* `backup/`
-* `logs/`
+| 경로 | 이유 |
+| --- | --- |
+| `.env` | 실제 Notion Integration Token 저장 |
+| `.env.*` | 로컬 환경별 토큰이나 설정이 들어갈 수 있음 |
+| `config/pages.json` | 실제 Notion Page ID 저장 |
+| `notes/private/` | 개인 노트나 비공개 자료 저장 |
+| `backup/` | 동기화 전 Notion 페이지 백업 저장 |
+| `logs/` | 실행 로그 저장 |
 
-예외적으로 `.env.example`은 공개 예시 파일로 커밋한다.
+`.env.example`과 `config/pages.example.json`은 예시 파일이므로 Git에 포함한다.
 
-## Public Readiness Check
+## `.env` 관리
 
-공개 전에는 다음 명령을 실행한다.
+`.env`에는 실제 Notion Token만 둔다.
+
+```env
+NOTION_TOKEN=your_actual_token
+NOTION_VERSION=2026-03-11
+```
+
+주의할 점:
+
+* `.env`를 커밋하지 않는다.
+* 토큰을 README, docs, 테스트 파일에 쓰지 않는다.
+* 토큰을 터미널 출력이나 로그 파일에 남기지 않는다.
+* 토큰이 노출되었다고 판단되면 Notion에서 새 토큰을 발급한다.
+
+## Page ID 관리
+
+실제 Notion Page ID는 `config/pages.json`에만 둔다. 공개 예시에는 더미 값만 사용한다.
+
+```json
+{
+  "sample": {
+    "title": "Sample Notion Page",
+    "page_id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "file": "notes/sample.md"
+  }
+}
+```
+
+## 백업과 로그
+
+동기화 시 기본적으로 기존 Notion Markdown이 `backup/`에 저장된다. `--log-file`을 사용하면 실행 결과가 `logs/` 같은 경로에 저장될 수 있다.
+
+이 파일들은 실제 문서 내용, 페이지 ID, 실행 경로를 포함할 수 있으므로 Git에 올리지 않는다.
+
+## 민감 정보 점검
+
+현재 Git에 추적 중인 파일을 검사한다.
 
 ```powershell
 python scripts\check_public_ready.py
 ```
 
-이 스크립트는 Git에 추적 중인 파일을 기준으로 다음 항목을 확인한다.
+점검 항목:
 
-* 로컬 전용 파일이 추적되고 있지 않은가
-* 비공개 노트, 백업, 로그 파일이 추적되고 있지 않은가
-* Notion Token처럼 보이는 값이 포함되어 있지 않은가
-* 실제 Notion Page ID처럼 보이는 값이 포함되어 있지 않은가
+* `.env`, `config/pages.json`, `notes/private/`, `backup/`, `logs/`가 추적되고 있지 않은가
+* Notion Token처럼 보이는 값이 추적 파일에 들어 있지 않은가
+* 실제 Notion Page ID처럼 보이는 값이 추적 파일에 들어 있지 않은가
 
-## Public Checklist
+이 스크립트는 현재 작업트리의 추적 파일을 검사한다. 과거 커밋 히스토리 전체를 보장하지는 않는다.
 
-공개 저장소로 전환하기 전에 다음 항목을 확인한다.
+## 수동 점검 명령
 
-* `.env`가 커밋되지 않았는가
-* 실제 Notion Token이 Git 히스토리에 남아 있지 않은가
-* 실제 개인 Notion Page ID가 공개 파일에 포함되지 않았는가
-* 개인 강의자료, PDF, 원문 자료가 포함되지 않았는가
+추적 파일 목록 확인:
+
+```powershell
+git ls-files
+```
+
+작업트리 상태 확인:
+
+```powershell
+git status --short
+```
+
+현재 추적 파일에서 의심 패턴 검색:
+
+```powershell
+git grep -n "secret_"
+git grep -n "ntn_"
+```
+
+## 커밋 전 체크리스트
+
+* `.env`가 Git 상태에 보이지 않는가
+* `config/pages.json`이 Git 상태에 보이지 않는가
+* `backup/`과 `logs/`가 Git 상태에 보이지 않는가
+* 문서에 실제 토큰이나 실제 Page ID를 쓰지 않았는가
 * `python scripts\check_public_ready.py`가 통과하는가
 * `python -m pytest`가 통과하는가
-* README만 보고 프로젝트 목적과 실행 방법을 이해할 수 있는가
-* 실행 가능한 예제 파일이 포함되어 있는가
-* 커밋 메시지 히스토리가 일관적인가
