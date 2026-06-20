@@ -72,7 +72,8 @@ python scripts\sync_page.py --all
 
 ## Documentation
 
-* [Usage](docs/USAGE.md): 설치, 설정, 연결 확인, 동기화 명령 전체 사용법
+* [Usage](docs/USAGE.md): 클론 후 테스트 페이지를 실제로 수정하기까지의 단계별 사용법
+* [Command Reference](docs/REFERENCE.md): 설정 파일, CLI 옵션, 문제 해결 상세
 * [Security](docs/SECURITY.md): 토큰, Page ID, 개인 노트, 백업/로그 파일 관리 기준
 * [Project Status](docs/STATUS.md): 구현된 기능과 아직 없는 기능
 
@@ -90,6 +91,7 @@ notion-note-sync/
 ├── docs/
 │   ├── SECURITY.md
 │   ├── STATUS.md
+│   ├── REFERENCE.md
 │   └── USAGE.md
 ├── notes/
 │   └── sample.md
