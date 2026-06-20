@@ -22,12 +22,12 @@ Markdown으로 관리하는 개인 노트를 Notion 페이지에 동기화하는
 * Notion 페이지의 Markdown 조회 가능 여부를 확인한다.
 * 로컬 Markdown 파일을 읽어 Notion 페이지 내용으로 교체한다.
 * `config/pages.json`에 등록한 페이지 키로 동기화 대상을 선택한다.
+* `config/pages.json`에 등록한 모든 페이지를 한 번에 동기화한다.
 * `--dry-run` 옵션으로 실제 수정 없이 동기화 대상을 확인한다.
 * 동기화 전 기존 Notion 페이지 Markdown을 `backup/`에 저장한다.
 
 추가로 고려하는 기능은 다음과 같다.
 
-* 여러 페이지 일괄 동기화
 * Markdown 변경 감지 후 자동 동기화
 * GitHub Actions 기반 자동 실행
 * 실행 로그와 실패 케이스 정리
@@ -160,10 +160,22 @@ python scripts\check_connection.py --page-id "NOTION_PAGE_ID"
 python scripts\sync_page.py --page sample
 ```
 
+설정 파일에 등록한 모든 페이지를 실행하려면 `--all`을 사용한다.
+
+```powershell
+python scripts\sync_page.py --all
+```
+
 실제 Notion 페이지를 수정하지 않고 대상만 확인하려면 `--dry-run`을 사용한다.
 
 ```powershell
 python scripts\sync_page.py --page sample --dry-run
+```
+
+전체 동기화도 dry-run으로 먼저 확인할 수 있다.
+
+```powershell
+python scripts\sync_page.py --all --dry-run
 ```
 
 Page ID와 Markdown 파일을 직접 지정할 수도 있다.
