@@ -1,52 +1,38 @@
 # Notion Note Sync
 
-Markdown 기반 학습 노트를 Notion 페이지에 자동 반영하기 위한 Python 자동화 프로젝트입니다.
+Markdown으로 관리하는 개인 노트를 Notion 페이지에 동기화하는 Python 자동화 프로젝트이다.
 
-이 프로젝트는 강의 노트, 개인 학습 정리, 기술 문서 초안을 Markdown으로 관리하고, Notion API를 통해 지정된 Notion 페이지에 동기화하는 것을 목표로 합니다.
+강의 노트, 학습 기록, 기술 문서 초안을 로컬 Markdown 파일로 작성하고, 필요한 시점에 Notion API를 통해 지정한 페이지에 반영하는 것을 목표로 한다. Notion은 정리와 공유에 편하지만, 반복해서 내용을 복사하거나 페이지를 직접 수정하는 과정은 번거롭다. 이 프로젝트는 그 반복 작업을 줄이기 위한 작은 도구이다.
 
-## 1. 프로젝트 목적
+## 목적
 
-Notion은 학습 노트와 문서 정리에 편리하지만, 긴 Markdown 정리본을 매번 수동으로 복사하거나 파일로 업로드하는 과정은 비효율적입니다.
+이 프로젝트의 목적은 다음과 같다.
 
-이 프로젝트는 Markdown 기반 문서 작성 흐름을 Notion과 연결하여 반복적인 수동 편집 작업을 줄이는 것을 목표로 합니다.
+* Markdown 파일을 기준으로 Notion 페이지 내용을 갱신한다.
+* Notion API 인증과 페이지 접근 권한을 별도로 테스트한다.
+* 실제 토큰, Page ID, 개인 노트 같은 민감한 값은 공개 파일과 분리한다.
+* 여러 Notion 페이지를 설정 파일로 관리할 수 있는 구조를 만든다.
+* 나중에 공개 저장소로 전환해도 안전한 프로젝트 형태를 유지한다.
 
-주요 목표는 다음과 같습니다.
+## 주요 기능
 
-* Markdown 파일을 Notion 페이지에 자동 반영
-* Notion API 기반 문서 업데이트 자동화
-* 개인 학습 노트와 기술 문서의 버전 관리
-* 민감한 설정 파일과 공개 가능한 예시 파일 분리
-* 추후 Public Repository 전환을 고려한 포트폴리오형 프로젝트 구성
+현재 구현한 기능은 다음과 같다.
 
-## 2. 문제 정의
+* `.env`에서 Notion Integration Token과 API 버전을 읽는다.
+* Notion 페이지의 Markdown 조회 가능 여부를 확인한다.
+* 로컬 Markdown 파일을 읽어 Notion 페이지 내용으로 교체한다.
+* `config/pages.json`에 등록한 페이지 키로 동기화 대상을 선택한다.
+* `--dry-run` 옵션으로 실제 수정 없이 동기화 대상을 확인한다.
 
-기존 Notion 기반 노트 정리 방식에는 다음과 같은 문제가 있습니다.
+추가로 고려하는 기능은 다음과 같다.
 
-* 긴 학습 노트를 매번 수동으로 붙여넣어야 함
-* 여러 Notion 페이지를 일관된 형식으로 관리하기 어려움
-* Markdown 파일과 Notion 페이지의 버전 관리가 분리됨
-* API Token, Page ID 등 민감한 설정을 안전하게 관리해야 함
-* 나중에 포트폴리오로 공개하기 위해 코드와 개인 데이터를 분리해야 함
-
-## 3. 핵심 기능
-
-현재 목표 기능은 다음과 같습니다.
-
-* Markdown 파일 읽기
-* Notion API 인증 처리
-* 특정 Notion 페이지에 Markdown 내용 반영
-* 챕터별 Notion 페이지 매핑 관리
-* 공개 가능한 예시 설정과 비공개 로컬 설정 분리
-
-향후 확장 기능은 다음과 같습니다.
-
-* 여러 Notion 페이지 일괄 동기화
-* 기존 Notion 페이지 내용 백업
+* 여러 페이지 일괄 동기화
+* 동기화 전 기존 페이지 내용 백업
 * Markdown 변경 감지 후 자동 동기화
 * GitHub Actions 기반 자동 실행
-* Notion MCP 또는 LLM 기반 문서 보정 워크플로우 연동
+* 실행 로그와 실패 케이스 정리
 
-## 4. 기술 스택
+## 기술 스택
 
 * Python
 * Notion API
@@ -55,146 +41,163 @@ Notion은 학습 노트와 문서 정리에 편리하지만, 긴 Markdown 정리
 * python-dotenv
 * Git / GitHub
 
-## 5. 프로젝트 구조
+## 프로젝트 구조
 
 ```text
 notion-note-sync/
 ├── README.md
-├── .gitignore
 ├── .env.example
+├── .gitignore
 ├── requirements.txt
 ├── config/
-│   └── pages.example.json
+│   ├── pages.example.json
+│   └── pages.json
 ├── notes/
 │   └── sample.md
+├── notionkit/
+│   ├── __init__.py
+│   ├── client.py
+│   └── settings.py
 └── scripts/
-    └── .gitkeep
+    ├── check_connection.py
+    └── sync_page.py
 ```
 
-## 6. 환경 변수 설정
+`config/pages.json`과 `.env`는 로컬 전용 파일이다. 실제 토큰이나 개인 Page ID가 들어갈 수 있으므로 Git에 올리지 않는다.
 
-`.env.example` 파일을 복사하여 `.env` 파일을 생성합니다.
+## 환경 설정
 
-```bash
-cp .env.example .env
-```
-
-Windows PowerShell에서는 다음 명령어를 사용할 수 있습니다.
+`.env.example`을 복사해 `.env`를 만든다.
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-`.env` 파일에 실제 Notion Integration Token을 입력합니다.
+macOS나 Linux에서는 다음 명령을 사용한다.
+
+```bash
+cp .env.example .env
+```
+
+`.env`에는 실제 Notion Integration Token과 Notion API 버전을 입력한다.
 
 ```env
 NOTION_TOKEN=your_notion_integration_token_here
 NOTION_VERSION=2026-03-11
 ```
 
-주의: `.env` 파일은 절대 GitHub에 커밋하지 않습니다.
+Notion API 버전은 Notion에서 허용하는 날짜 값이어야 한다. 잘못된 버전을 넣으면 `missing_version` 오류가 발생한다.
 
-## 7. 설치 방법
+## 설치
 
-가상환경을 생성합니다.
+가상환경을 만든다.
 
-```bash
+```powershell
 python -m venv .venv
 ```
 
-가상환경을 활성화합니다.
-
-Windows PowerShell:
+PowerShell에서 가상환경을 활성화한다.
 
 ```powershell
 .venv\Scripts\Activate.ps1
 ```
 
-Git Bash:
+필요한 패키지를 설치한다.
 
-```bash
-source .venv/Scripts/activate
-```
-
-macOS / Linux:
-
-```bash
-source .venv/bin/activate
-```
-
-패키지를 설치합니다.
-
-```bash
+```powershell
 pip install -r requirements.txt
 ```
 
-## 8. 사용 예시
+## Notion 페이지 연결
 
-현재는 프로젝트 초기 세팅 단계입니다.
+Notion Integration을 만든 뒤, 동기화할 Notion 페이지에 해당 Integration을 연결해야 한다.
 
-향후 목표 실행 명령어는 다음과 같습니다.
+페이지가 Integration에 공유되지 않으면 API 요청은 404로 실패한다. 이때 응답에는 보통 `object_not_found`와 함께 페이지를 Integration에 공유하라는 메시지가 나온다.
 
-```bash
-python -m scripts.sync_page --page sample
+확인 순서는 다음과 같다.
+
+1. Notion에서 대상 페이지를 연다.
+2. 오른쪽 위 `Share` 또는 `...` 메뉴를 연다.
+3. `Connections`에서 이 프로젝트의 Integration을 추가한다.
+4. Page ID를 `config/pages.json`에 저장한다.
+
+## 페이지 매핑 설정
+
+`config/pages.example.json`을 참고해 `config/pages.json`을 만든다.
+
+```json
+{
+  "sample": {
+    "title": "Sample Notion Page",
+    "page_id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "file": "notes/sample.md"
+  }
+}
 ```
 
-또는 특정 Markdown 파일과 Notion Page ID를 직접 지정하는 방식도 지원할 예정입니다.
+각 항목의 의미는 다음과 같다.
 
-```bash
-python -m scripts.sync_page --page-id "NOTION_PAGE_ID" --file "notes/sample.md"
+* `sample`: 명령에서 사용할 페이지 키이다.
+* `title`: 사람이 구분하기 위한 이름이다.
+* `page_id`: Notion Page ID이다.
+* `file`: Notion에 반영할 Markdown 파일 경로이다.
+
+## 연결 테스트
+
+Notion 페이지 접근 권한과 Markdown 조회 가능 여부를 확인한다.
+
+```powershell
+python scripts\check_connection.py --page-id "NOTION_PAGE_ID"
 ```
 
-## 9. 보안 원칙
+정상 연결되면 페이지 ID, Markdown 길이, 일부 미리보기 내용이 출력된다.
 
-이 프로젝트는 추후 Public Repository로 공개될 수 있으므로 다음 원칙을 따릅니다.
+## 동기화 실행
 
-* 실제 Notion API Token은 `.env`에만 저장합니다.
-* `.env` 파일은 Git에 커밋하지 않습니다.
-* 실제 Notion Page ID는 `config/pages.json`에 저장합니다.
-* 공개 레포에는 `config/pages.example.json`만 포함합니다.
-* 개인 학습 노트 원문이나 민감한 자료는 `notes/private/`에 보관하고 커밋하지 않습니다.
-* Public 전환 전 Git 히스토리에 민감정보가 포함되어 있지 않은지 확인합니다.
+설정 파일에 등록한 페이지 키로 실행한다.
 
-## 10. 커밋 메시지 규칙
+```powershell
+python scripts\sync_page.py --page sample
+```
 
-이 프로젝트는 Conventional Commits 스타일을 참고합니다.
+실제 Notion 페이지를 수정하지 않고 대상만 확인하려면 `--dry-run`을 사용한다.
 
-커밋 메시지 형식은 다음과 같습니다.
+```powershell
+python scripts\sync_page.py --page sample --dry-run
+```
+
+Page ID와 Markdown 파일을 직접 지정할 수도 있다.
+
+```powershell
+python scripts\sync_page.py --page-id "NOTION_PAGE_ID" --file "notes/sample.md"
+```
+
+Notion 페이지 안에 child page나 database가 있으면 내용 교체가 막힐 수 있다. 그런 항목 삭제가 필요한 교체 작업을 허용하려면 다음 옵션을 사용한다.
+
+```powershell
+python scripts\sync_page.py --page sample --allow-deleting-content
+```
+
+## 보안 원칙
+
+이 프로젝트는 나중에 공개 저장소로 전환할 가능성을 고려한다. 그래서 민감한 정보는 처음부터 분리해서 관리한다.
+
+* `.env`에는 실제 Notion API Token만 저장한다.
+* `.env`는 Git에 커밋하지 않는다.
+* 실제 Notion Page ID는 `config/pages.json`에 저장한다.
+* 공개 저장소에는 `config/pages.example.json`만 포함한다.
+* 개인 노트나 민감한 자료는 `notes/private/`에 두고 커밋하지 않는다.
+* 공개 전에는 Git 히스토리에 토큰이나 개인 Page ID가 남아 있지 않은지 확인한다.
+
+## 커밋 메시지 규칙
+
+이 프로젝트는 Conventional Commits 형식을 참고한다.
 
 ```text
 type(scope): description
 ```
 
-예시:
-
-```text
-init: create base project directories
-docs(readme): add project documentation
-config(gitignore): ignore local environment and private files
-config(env): add example environment variables
-feat(sync): implement markdown page sync command
-fix(auth): handle missing notion token
-refactor(client): extract notion api request logic
-test(sync): add sync page test cases
-chore(deps): update dependencies
-```
-
-### Commit Type
-
-| Type       | 의미                  |
-| ---------- | ------------------- |
-| `init`     | 프로젝트 초기 구조 생성       |
-| `feat`     | 새로운 기능 추가           |
-| `fix`      | 버그 수정               |
-| `docs`     | 문서 수정               |
-| `style`    | 코드 포맷팅, 공백, 세미콜론 등  |
-| `refactor` | 기능 변화 없는 코드 구조 개선   |
-| `test`     | 테스트 코드 추가 또는 수정     |
-| `chore`    | 패키지, 설정, 빌드 등 기타 작업 |
-| `config`   | 환경설정 파일 수정          |
-| `security` | 보안 관련 수정            |
-
-### Commit Message Examples
+예시는 다음과 같다.
 
 ```text
 init: create base project directories
@@ -202,19 +205,33 @@ docs(readme): add project documentation
 config(gitignore): ignore local environment and private files
 config(env): add example environment variables
 config(notion): add example page mapping
-chore(deps): add initial Python dependencies
-docs(sample): add sample markdown note
 feat(sync): implement markdown page sync command
-fix(sync): handle invalid page mapping key
+fix(auth): handle missing notion token
 refactor(client): extract notion api request logic
+test(sync): add sync page test cases
+chore(deps): update dependencies
 ```
 
-## 11. 개발 로드맵
+자주 쓰는 타입은 다음과 같다.
+
+| Type | 의미 |
+| --- | --- |
+| `init` | 프로젝트 초기 구조 생성 |
+| `feat` | 기능 추가 |
+| `fix` | 버그 수정 |
+| `docs` | 문서 수정 |
+| `style` | 코드 포맷, 공백, 세미콜론 등 비동작 변경 |
+| `refactor` | 기능 변화 없는 코드 구조 개선 |
+| `test` | 테스트 추가 또는 수정 |
+| `chore` | 패키지, 빌드, 기타 관리 작업 |
+| `config` | 환경 설정 파일 수정 |
+| `security` | 보안 관련 수정 |
+
+## 개발 로드맵
 
 ### Phase 1. Repository Setup
 
-* GitHub Private Repository 생성
-* 기본 폴더 구조 생성
+* 기본 디렉터리 구조 생성
 * `.gitignore` 작성
 * `.env.example` 작성
 * `requirements.txt` 작성
@@ -223,16 +240,16 @@ refactor(client): extract notion api request logic
 ### Phase 2. Notion API Connection
 
 * Notion Integration 생성
-* 환경변수 기반 인증 처리
+* 환경 변수 기반 인증 처리
 * Notion API 요청 테스트
-* Notion 페이지 권한 연결
+* 페이지 접근 권한 확인
 
 ### Phase 3. Markdown Sync
 
 * Markdown 파일 읽기
 * Notion 페이지에 Markdown 내용 반영
 * 페이지 매핑 설정 적용
-* 단일 페이지 동기화 명령어 구현
+* 단일 페이지 동기화 명령 구현
 
 ### Phase 4. Multi Page Sync
 
@@ -246,22 +263,22 @@ refactor(client): extract notion api request logic
 * 예제 문서 추가
 * 사용법 정리
 * 보안 점검
-* Public Repository 전환 준비
+* 공개 저장소 전환 준비
 
-## 12. 공개 전 체크리스트
+## 공개 전 체크리스트
 
-Public Repository로 전환하기 전에 다음 항목을 확인합니다.
+공개 저장소로 전환하기 전에 다음 항목을 확인한다.
 
-* `.env` 파일이 커밋되지 않았는가?
-* 실제 Notion Token이 Git 히스토리에 남아 있지 않은가?
-* 실제 개인 Notion Page ID가 공개 파일에 포함되지 않았는가?
-* 개인 강의자료, PDF, 대본 원문이 포함되지 않았는가?
-* README만 보고 프로젝트 목적과 사용법을 이해할 수 있는가?
-* 실행 가능한 예제 파일이 포함되어 있는가?
-* 커밋 메시지 히스토리가 일관적인가?
+* `.env`가 커밋되지 않았는가
+* 실제 Notion Token이 Git 히스토리에 남아 있지 않은가
+* 실제 개인 Notion Page ID가 공개 파일에 포함되지 않았는가
+* 개인 강의자료, PDF, 원문 자료가 포함되지 않았는가
+* README만 보고 프로젝트 목적과 실행 방법을 이해할 수 있는가
+* 실행 가능한 예제 파일이 포함되어 있는가
+* 커밋 메시지 히스토리가 일관적인가
 
-## 13. License
+## License
 
-초기 개발 단계에서는 라이선스를 지정하지 않습니다.
+초기 개발 단계에서는 라이선스를 지정하지 않는다.
 
-Public Repository로 전환하기 전에 공개 범위와 재사용 정책에 맞는 라이선스를 선택할 예정입니다.
+공개 저장소로 전환하기 전에 공개 범위와 사용 목적에 맞는 라이선스를 선택할 예정이다.
