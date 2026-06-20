@@ -16,6 +16,7 @@ Notion 페이지를 웹에서 직접 열어 내용을 복사하고 붙여넣는 
 * API 일시 오류와 rate limit에 대해 재시도한다.
 * 실행 로그를 `--log-file`로 파일에 남긴다.
 * 일괄 동기화 결과를 성공/실패 개수와 실패 상세로 요약한다.
+* 테스트와 민감 정보 점검을 CI에서 실행할 수 있다.
 
 ## Quick Start
 
@@ -74,6 +75,7 @@ python scripts\sync_page.py --all
 
 * [Usage](docs/USAGE.md): 클론 후 테스트 페이지를 실제로 수정하기까지의 단계별 사용법
 * [Command Reference](docs/REFERENCE.md): 설정 파일, CLI 옵션, 문제 해결 상세
+* [Design Notes](docs/DESIGN.md): Notion API 직접 사용, 권한 범위, 안전장치 설계
 * [Security](docs/SECURITY.md): 토큰, Page ID, 개인 노트, 백업/로그 파일 관리 기준
 * [Project Status](docs/STATUS.md): 구현된 기능과 아직 없는 기능
 
@@ -91,8 +93,12 @@ notion-note-sync/
 ├── docs/
 │   ├── SECURITY.md
 │   ├── STATUS.md
+│   ├── DESIGN.md
 │   ├── REFERENCE.md
 │   └── USAGE.md
+├── .github/
+│   └── workflows/
+│       └── ci.yml
 ├── notes/
 │   └── sample.md
 ├── notionkit/

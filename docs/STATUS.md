@@ -17,6 +17,8 @@
 | 설정 검증 | `config/pages.json` 구조와 필수 값 검증 |
 | 보안 점검 | `check_public_ready.py`로 민감 정보 포함 여부 점검 |
 | 테스트 | `pytest` 단위 테스트 포함 |
+| CI | GitHub Actions에서 테스트와 공개 준비 점검 실행 |
+| 설계 문서 | Notion API 직접 사용 이유와 안전장치 정리 |
 
 ## 아직 구현하지 않은 기능
 
