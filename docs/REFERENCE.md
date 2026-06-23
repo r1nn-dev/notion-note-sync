@@ -1,6 +1,6 @@
 # Command Reference
 
-이 문서는 `notion-note-sync`의 설정 파일, CLI 옵션, 예외 상황을 자세히 정리한다. 처음 실행하는 사람은 먼저 [Usage](USAGE.md)를 따라 진행하고, 옵션 의미를 확인할 때 이 문서를 참고한다.
+설정 파일, CLI 옵션, 예외 상황 정리. 기본 실행 절차는 [Usage](USAGE.md)를 참고한다.
 
 ## 1. 설치
 
