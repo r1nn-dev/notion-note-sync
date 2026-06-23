@@ -1,8 +1,6 @@
 # Security
 
-이 문서는 이 저장소에서 민감 정보를 다루는 기준을 정리한다. 핵심은 Notion Token, 실제 Page ID, 개인 노트, 백업/로그 파일을 Git에 올리지 않는 것이다.
-
-이 프로젝트는 Notion API를 직접 호출한다. 사용자가 `config/pages.json`에 지정한 페이지와 파일만 동기화하고, Notion 쪽 권한도 Integration이 연결된 페이지로 제한한다.
+Notion Token, 실제 Page ID, 개인 노트, 백업/로그 파일은 Git에 올리지 않는다.
 
 ## Git에 올리지 않는 파일
 
