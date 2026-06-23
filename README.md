@@ -4,7 +4,7 @@
 
 Notion 페이지를 웹에서 직접 열어 내용을 복사하고 붙여넣는 대신, 로컬에서 작성한 Markdown 파일을 기준으로 지정한 Notion 페이지를 갱신한다. 여러 페이지를 `config/pages.json`으로 관리하고, 동기화 전 기존 Notion 내용을 자동 백업한다.
 
-큰 문서 관리 시스템이나 Notion 대체 도구가 아니라, 정해진 Markdown 파일을 정해진 Notion 페이지에 안전하게 반영하기 위한 작은 자동화 도구이다.
+정해진 Markdown 파일을 정해진 Notion 페이지에 반영하기 위한 단방향 동기화 도구이다.
 
 ## What It Does
 
